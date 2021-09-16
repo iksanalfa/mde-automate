@@ -9,6 +9,8 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import io.cucumber.java.Scenario;
+
 public class DriverSetup {
 	
 	public static ChromeDriver driver;
@@ -22,7 +24,8 @@ public class DriverSetup {
 	public static final String WEB_DRIVER = "webdriver.chrome.driver";
 //	public static final String WEB_DRIVER_LOC = "D:\\Telkom Sigma\\SeleniumTutorial\\browserdrivers\\chromedriver.exe";
 	public static final String WEB_DRIVER_LOC =  userDir + "resource\\browserdrivers\\chromedriver.exe";
-	public static final String WEB_ADDRESS = "https://10.20.16.30:8444/renaissance-portal/#/";
+//	public static final String WEB_ADDRESS = "https://10.20.16.30:8444/renaissance-portal/#/";
+	public static final String WEB_ADDRESS = "https://10.132.130.254:8444/renaissance-portal/#/";
 	
 	public DriverSetup(ChromeDriver driver) {
 		System.setProperty(WEB_DRIVER, WEB_DRIVER_LOC);

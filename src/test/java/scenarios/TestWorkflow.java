@@ -32,7 +32,7 @@ import net.masterthought.cucumber.sorting.SortingMethod;
 
 public class TestWorkflow {
 
-	ChromeDriver driver;
+	ChromeDriver driver = new ChromeDriver();
 	WebDriverWait wait;
 	Actions action;
 	JavascriptExecutor jse;

@@ -9,4 +9,4 @@ Feature: JALIN_ITMX History
 
     Examples: 
       | username | password | mainmenu | submenu | workflowname | button |
-      | sigmauser-4 | S1gm41234* | Workflow Manager | Workflows | JALIN_ITMX_EOD | Run History |
+      | Sigmauser-4 | S1gm41234* | Workflow Manager | Workflows | JALIN_ITMX_EOD | Run History |

@@ -1,0 +1,36 @@
+tambah dependency di pom
+
+<!-- SFTP -->
+<dependency>
+	<groupId>com.jcraft</groupId>
+	<artifactId>jsch</artifactId>
+	<version>0.1.55</version>
+</dependency>
+
+
+-------------------------------------------
+file java
+
+SFTPUtil.java folder location src/test/java/utils
+TestSftp.java folder location src/test/java/runners
+
+
+-------------------------------------------
+untuk auth
+
+file cert.pem dan key.pem
+generate rsa and cert untuk sftp client
+openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes
+
+--
+
+file key.pfx
+generate pcks12 from rsa and cert untuk sftp server
+openssl pkcs12 -export -out key.pfx -inkey key.pem -in cert.pem -passout pass:password
+
+--
+
+file known_hosts
+generate known hosts , ?need write permission from ftp server? untuk sftp client
+ssh-keyscan 127.0.0.1 > known_hosts
+

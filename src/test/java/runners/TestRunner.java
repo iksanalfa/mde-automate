@@ -22,7 +22,7 @@ import net.masterthought.cucumber.presentation.PresentationMode;
 import net.masterthought.cucumber.sorting.SortingMethod;
 
 @RunWith(Cucumber.class)
-@CucumberOptions(features = "src/test/resources/features/", glue = "scenarios", monochrome = true
+@CucumberOptions(features = "src/test/resources/features/Workflow.feature", glue = "scenarios", monochrome = true
 , plugin = {"json:target/cucumber.json"})
 public class TestRunner {
 		

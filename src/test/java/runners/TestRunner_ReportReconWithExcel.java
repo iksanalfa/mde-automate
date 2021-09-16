@@ -22,9 +22,9 @@ import net.masterthought.cucumber.presentation.PresentationMode;
 import net.masterthought.cucumber.sorting.SortingMethod;
 
 @RunWith(Cucumber.class)
-@CucumberOptions(features = "src/test/resources/features/ReportRecon/ReportReconPCIn.feature", glue = "scenarios", monochrome = true
+@CucumberOptions(features = "src/test/resources/features/ReportRecon/TestRekonWithExcel.feature", glue = "scenarios", monochrome = true
 , plugin = {"json:target/cucumber.json"})
-public class TestRunner_ReportRecon {
+public class TestRunner_ReportReconWithExcel {
 		
 	@AfterClass
 	public static void tearDown() {

@@ -13,9 +13,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.interactions.Actions;
@@ -32,6 +35,7 @@ import io.cucumber.java.BeforeStep;
 import io.cucumber.java.Scenario;
 import io.cucumber.java.en.*;
 import utils.DriverSetup;
+import utils.ExcelReader;
 import utils.HighlightAndScreenShot;
 import utils.JavaPostRequest;
 import utils.SFTPUtil;
@@ -41,7 +45,7 @@ import utils.TrustAllCertificates;
 import utils.ValidateFile;
 //import utils.WSRestClient;
 
-public class ReportReconScen {
+public class ReportRekonWithExcel {
 
 	Scenario scenario = ScenarioSetup.scenario;
 	SimpleFileReader sfr = new SimpleFileReader();
@@ -73,10 +77,12 @@ public class ReportReconScen {
 	
 	String transactionType;
 	String processingCode;
-	BigDecimal transactionAmount;
+	String transactionAmount;
 	String acquirerId;
 	String issuerId;
 	String responseCode;
+	String rrn;
+	String transId;
 	String dateFormat1 = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 	String dateFormat2 = LocalDate.now().format(DateTimeFormatter.ofPattern("yyMMdd"));
 	String dateFormat3 = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -84,24 +90,38 @@ public class ReportReconScen {
 	String reportName_ACQ;
 	String reportName_ISS;
 	
+	List<Map<String, String>> testData;
+	
 
-	@Given("^Transaksi (.*) dengan Processing Code (.*) senilai (.*) Acquirer Paynet (.*) Issuer (.*)$")
-	public void transaksi_outbound_dengan_processing_code_senilai_acquirer_paynet_issuer(String transactionType,
-			String processingCode, BigDecimal transactionAmount, String acquirerId, String issuerId)
-			throws IOException {
-		this.transactionType = transactionType;
-		this.processingCode = processingCode;
-		this.transactionAmount = transactionAmount;
-		this.acquirerId = acquirerId;
-		this.issuerId = issuerId;
+	@Given("^Transaksi Menggunakan Parameter Pada Excel Sheet (.*) Row (.*)$")
+	public void hitTransaction(String sheetName, Integer rowNumber)
+			throws IOException, InvalidFormatException {
+		
+		ExcelReader xlsReader = new ExcelReader();
+		String excelFilePath = userDir + "xlsdata\\auto-transaction-data.xlsx";
+		testData = xlsReader.getData(excelFilePath, sheetName);
+		
+		this.transactionType = testData.get(rowNumber).get("transationType");
+		this.processingCode = testData.get(rowNumber).get("processingCode");
+		this.transactionAmount = testData.get(rowNumber).get("transactionAmount");
+		this.acquirerId = testData.get(rowNumber).get("acquirerId");
+		this.issuerId = testData.get(rowNumber).get("issuerId");
+		this.rrn = testData.get(rowNumber).get("rrn");
+		this.transId = testData.get(rowNumber).get("transId");
+		this.responseCode = testData.get(rowNumber).get("responseCode");
+		
+		scenario.attach(testData.get(rowNumber).toString(), "text/plain", "Data Row-" +rowNumber);
 		
 		//Post Request
-		jpr.postRequest(scenario);
+//		jpr.postRequest(scenario);
+		
+//		jpr.postRequest(scenario, transactionType, processingCode, transactionAmount, acquirerId, issuerId,
+//				rrn, transId);
 
 	}
 
-	@And("^Response Code (.*) dan Tanggal Transaksi (.*)$")
-	public void response_code_dan_tanggal_transaksi(String responseCode, String YYyymmdd)
+	@And("^Cek Transaksi Pada Transaction Manager$")
+	public void checkTransaction()
 			throws InterruptedException, IOException {
 		String dateDay = String.valueOf(LocalDate.now().getDayOfMonth());
 		login.userLogin("Sigmauser-12", "S!gm4user12@12#$", scenario);
@@ -126,15 +146,15 @@ public class ReportReconScen {
 		Thread.sleep(1000);
 		menu.clickElementByXpath("//div[@class='ren-btn-sm ren-btn-primary']", scenario);
 		Thread.sleep(1000);
-		menu.inputElement("//input[@placeholder='Acquirer RRN']", "123980180382", scenario);
+		menu.inputElement("//input[@placeholder='Acquirer RRN']", rrn, scenario);
 		Thread.sleep(1000);
 		menu.clickButton("Search Transactions", scenario);
 		Thread.sleep(10000);
 		menu.clickElementByXpath("//div[@class='ren-card ren-flex-column-full-space']", scenario);
 	}
 
-	@When("^Running workflow report Recon$")
-	public void running_workflow_report_recon() throws InterruptedException, IOException {
+	@When("^Jalankan Worklow Report$")
+	public void runningWorkflow() throws InterruptedException, IOException {
 		menu.clickSubMenu("Workflow Manager", "Workflows", scenario);
 		menu.doubleClickData("JALIN_LINK_EOD", scenario);
 		Thread.sleep(3000);
@@ -142,8 +162,8 @@ public class ReportReconScen {
 
 	}
 	
-	@And("^Moving File Report$")
-	public void moving_file_report() throws InterruptedException, IOException {
+	@And("^Memindahkan File Report$")
+	public void movingFileReport() throws InterruptedException, IOException {
 		reportName_ACQ = vf.createReportReconName(scenario, dateFormat2, acquirerId, issuerId, transactionType, "ACQ");
 		reportName_ISS = vf.createReportReconName(scenario, dateFormat2, acquirerId, issuerId, transactionType, "ISS");
 		
@@ -153,27 +173,25 @@ public class ReportReconScen {
 
 	}
 
-	@Then("^Validate Report QRX_RECON_360004_(.*)_(.*)_ACQ_1 compare with (.*) (.*) (.*) (.*) (.*) (.*)$")
-	public void validate_report_qrx_recon__acq(String transactionType, String yymmdd, String processingCode,
-			String transactionAmount, String yyyymmdd, String responseCode, String acquirerId, String issuerId)
+	@Then("^Validasi Report Rekon Acquirer$")
+	public void validateReportACQ()
 			throws IOException {
 		ArrayList<ArrayList<String>> list1 = new ArrayList<ArrayList<String>>();
 
 		String filePath = userDir + reportName_ACQ;
 		list1 = sfr.getEveryColumn(filePath, scenario);
-		vf.valReportRecon(list1, scenario, processingCode, transactionAmount, yyyymmdd, responseCode, acquirerId,
+		vf.valReportRecon(list1, scenario, processingCode, transactionAmount, dateFormat1, responseCode, acquirerId,
 				issuerId);
 	}
 
-	@And("^Validate Report QRX_RECON_360004_(.*)_(.*)_ISS_1 compare with (.*) (.*) (.*) (.*) (.*) (.*)$")
-	public void validate_report_qrx_recon__iss(String transactionType, String yymmdd, String processingCode,
-			String transactionAmount, String yyyymmdd, String responseCode, String acquirerId, String issuerId)
+	@And("^Validasi Report Rekon Issuer$")
+	public void validateReportISS()
 			throws IOException {
 		ArrayList<ArrayList<String>> list2 = new ArrayList<ArrayList<String>>();
 
 		String filePath = userDir + reportName_ISS;
 		list2 = sfr.getEveryColumn(filePath, scenario);
-		vf.valReportRecon(list2, scenario, processingCode, transactionAmount, yyyymmdd, responseCode, acquirerId,
+		vf.valReportRecon(list2, scenario, processingCode, transactionAmount, dateFormat1, responseCode, acquirerId,
 				issuerId);
 	}
 

@@ -12,6 +12,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import io.cucumber.java.Scenario;
@@ -52,7 +53,7 @@ public class MenuPage {
 		hns = new HighlightAndScreenShot(driver);
 	}
 	
-	public void clickMenu(String xMenu, Scenario scenario) throws InterruptedException, IOException {
+	public void clickMenu(String labelMenu, Scenario scenario) throws InterruptedException, IOException {
 		xMenu = "//span[normalize-space()='" + labelMenu  +"']";
 		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xMenu)));
 		
@@ -106,4 +107,45 @@ public class MenuPage {
 		}
 		return listFirstRow;
 	}
+	
+	public void clickElement(String elementId, Scenario scenario) throws IOException, InterruptedException {
+		String xElement = "//input[@id='" + elementId + "']";
+		//input[@id='transactionDateRange']
+		WebElement element = driver.findElementByXPath(xElement);
+		hns.doProcess(element, "Click Element " +elementId, scenario);
+		element.click();
+	}
+	
+	public void clickSelect(String xSelect, String visibleValue, Scenario scenario) throws IOException, InterruptedException {
+//		String xSelect = "//div[@id='startPicker']//div//select[@class='ren-form-control month']";
+		WebElement element = driver.findElementByXPath(xSelect);
+		hns.doProcess(element, "Click Element " +visibleValue, scenario);
+		Select select = new Select(element);
+		select.selectByVisibleText(visibleValue);
+	}
+	
+	public void inputElement(String xElement, String value, Scenario scenario) throws IOException, InterruptedException {
+		WebElement element = driver.findElementByXPath(xElement);
+		element.sendKeys(value);
+		hns.doProcess(element, "Input " +value, scenario);
+	}
+	
+	public void clickDayElement(String xElement, String value, Scenario scenario) throws IOException, InterruptedException {
+		WebElement element = driver.findElementByXPath(xElement);
+		element.click();
+		hns.doProcess(element, "Click Day " +value, scenario);
+	}
+	
+	public void clickElementByXpath(String xElement, Scenario scenario) throws IOException, InterruptedException {
+		WebElement element = driver.findElementByXPath(xElement);
+		hns.doProcess(element, "Click Element", scenario);
+		element.click();
+	}
+	
+	public String getValueElement(String xElement, Scenario scenario) throws IOException, InterruptedException {
+		WebElement element = driver.findElementByXPath(xElement);
+		String value = element.getAttribute("value");
+		return value;
+	}
+	
 }
