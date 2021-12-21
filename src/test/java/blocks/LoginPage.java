@@ -53,5 +53,22 @@ public class LoginPage {
 		
 		Thread.sleep(1000);
 	}
+	
+	public void testLogin(String username, String password, Scenario scenario) throws InterruptedException, IOException {
+		
+		driver.get(DriverSetup.WEB_ADDRESS);
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"userName\"]")));
+		
+		WebElement txt_username = driver.findElementByXPath("//*[@id=\"userName\"]");
+		txt_username.sendKeys(username);
+		
+		WebElement txt_password = driver.findElementByXPath("//*[@id=\"password\"]");
+		txt_password.sendKeys(password);
+		
+		WebElement btn_login = driver.findElementByXPath("//button[normalize-space()='Login']");
+		btn_login.click();
+		
+		Thread.sleep(1000);
+	}
 
 }

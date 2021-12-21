@@ -24,8 +24,8 @@ public class DriverSetup {
 	public static final String WEB_DRIVER = "webdriver.chrome.driver";
 //	public static final String WEB_DRIVER_LOC = "D:\\Telkom Sigma\\SeleniumTutorial\\browserdrivers\\chromedriver.exe";
 	public static final String WEB_DRIVER_LOC =  userDir + "resource\\browserdrivers\\chromedriver.exe";
-//	public static final String WEB_ADDRESS = "https://10.20.16.30:8444/renaissance-portal/#/";
-	public static final String WEB_ADDRESS = "https://10.132.130.254:8444/renaissance-portal/#/";
+	public static final String WEB_ADDRESS = "https://10.20.16.30:8444/renaissance-portal/#/"; //REN EURONET EN
+//	public static final String WEB_ADDRESS = "https://10.132.130.254:8444/renaissance-portal/#/"; //REN Jalin
 	
 	public DriverSetup(ChromeDriver driver) {
 		System.setProperty(WEB_DRIVER, WEB_DRIVER_LOC);
@@ -49,6 +49,10 @@ public class DriverSetup {
 		
 		return driver;
 		
+	}
+	
+	public void closeDriver() {
+		driver.quit();
 	}
 
 }

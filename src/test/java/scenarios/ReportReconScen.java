@@ -31,6 +31,7 @@ import io.cucumber.java.Before;
 import io.cucumber.java.BeforeStep;
 import io.cucumber.java.Scenario;
 import io.cucumber.java.en.*;
+import runners.MainRunner;
 import utils.DriverSetup;
 import utils.HighlightAndScreenShot;
 import utils.JavaPostRequest;
@@ -73,7 +74,7 @@ public class ReportReconScen {
 	
 	String transactionType;
 	String processingCode;
-	BigDecimal transactionAmount;
+	String transactionAmount;
 	String acquirerId;
 	String issuerId;
 	String responseCode;
@@ -85,55 +86,60 @@ public class ReportReconScen {
 	String reportName_ISS;
 	
 
-	@Given("^Transaksi (.*) dengan Processing Code (.*) senilai (.*) Acquirer Paynet (.*) Issuer (.*)$")
-	public void transaksi_outbound_dengan_processing_code_senilai_acquirer_paynet_issuer(String transactionType,
-			String processingCode, BigDecimal transactionAmount, String acquirerId, String issuerId)
+	@Given("^Transaksi (.*) dengan Processing Code (.*) senilai (.*) Acquirer Paynet (.*) Issuer (.*) Rrn (.*) TransId (.*) Response Code (.*) Tanggal Transaksi (.*) Loop (.*)$")
+	public void hitTransaction(String transactionType,
+			String processingCode, String transactionAmount, String acquirerId, String issuerId,
+			String rrn, String transId, String responseCode, String transactionDate,
+			String loop)
 			throws IOException {
-		this.transactionType = transactionType;
-		this.processingCode = processingCode;
-		this.transactionAmount = transactionAmount;
-		this.acquirerId = acquirerId;
-		this.issuerId = issuerId;
+				
+		ArrayList<String> listTrxType = new ArrayList<String>();
+		ArrayList<String> listTrxAmount = new ArrayList<String>();
+		ArrayList<String> listResponseCode = new ArrayList<String>();
 		
-		//Post Request
-		jpr.postRequest(scenario);
+		if(transactionType.contains(";")) {
+			listTrxType = jpr.getDataAsList(transactionType);
+		}
+		
+		if(transactionAmount.contains(";")) {
+			listTrxAmount = jpr.getDataAsList(transactionAmount);
+		}
+		
+		if(responseCode.contains(";")) {
+			listResponseCode = jpr.getDataAsList(responseCode);
+		}
+		
+		if (loop.equalsIgnoreCase("y")) {
+			for(int i =0; i < listTrxType.size(); i++) {
+				jpr.postRequest(scenario, rrn, transId, listTrxAmount.get(i), transactionDate, acquirerId, issuerId, processingCode, listResponseCode.get(i)
+						,listTrxType.get(i));
+			}			
+		} else {
+			//Post Request
+			jpr.postRequest(scenario, rrn, transId, transactionAmount, transactionDate, acquirerId, issuerId, processingCode, responseCode,
+					transactionType);
+		}
 
 	}
 
-	@And("^Response Code (.*) dan Tanggal Transaksi (.*)$")
-	public void response_code_dan_tanggal_transaksi(String responseCode, String YYyymmdd)
+	@And("^Check Transaction Manager Date (.*) Rrn (.*)$")
+	public void checkTransactionManager(String transactionDate, String rrn)
 			throws InterruptedException, IOException {
-		String dateDay = String.valueOf(LocalDate.now().getDayOfMonth());
-		login.userLogin("Sigmauser-12", "S!gm4user12@12#$", scenario);
-		menu.clickMenu("Transaction Manager", scenario);
-		Thread.sleep(3000);
-		menu.clickElementByXpath("//input[@id='transactionDateRange']", scenario);
-		Thread.sleep(1000);
-		menu.clickSelect("//div[@id='startPicker']//div//select[@class='ren-form-control month']", "September",
-				scenario);
-		Thread.sleep(1000);
-		menu.inputElement("//div[@id='startPicker']//div//input[@name='year']", "", scenario);
-		Thread.sleep(1000);
-		menu.clickDayElement(
-				"//div[@id='startPicker']//div//div//div[contains(@class,'calendar-day')][normalize-space()='" + dateDay +"']",
-				dateDay, scenario);		
-		Thread.sleep(1000);
-		menu.clickSelect("//div[@id='endPicker']//div//select[@class='ren-form-control month']", "September", scenario);
-		Thread.sleep(1000);
-		menu.inputElement("//div[@id='endPicker']//div//input[@name='year']", "", scenario);
-		Thread.sleep(1000);
-		menu.clickDayElement("//div[@id='endPicker']//div//div//div[contains(@class,'calendar-day')][normalize-space()='" + dateDay +"']", dateDay, scenario);
-		Thread.sleep(1000);
-		menu.clickElementByXpath("//div[@class='ren-btn-sm ren-btn-primary']", scenario);
-		Thread.sleep(1000);
-		menu.inputElement("//input[@placeholder='Acquirer RRN']", "123980180382", scenario);
-		Thread.sleep(1000);
-		menu.clickButton("Search Transactions", scenario);
-		Thread.sleep(10000);
-		menu.clickElementByXpath("//div[@class='ren-card ren-flex-column-full-space']", scenario);
+//		String dateDay = String.valueOf(LocalDate.now().getDayOfMonth());
+		String dateDay = transactionDate.substring(6, 8);
+		
+//		login.userLogin("Sigmauser-12", "S!gm4user12@12#$", scenario); //Jalin
+		login.userLogin("Sigmauser-4", "S1gm41234*", scenario); //EN
+		
+		menu.checkTransaction(scenario, transactionDate, rrn);
+
+		//Logout
+		menu.logout(scenario);
+		//Close Driver
+		driverSetup.closeDriver();
 	}
 
-	@When("^Running workflow report Recon$")
+	@When("^Running workflow report$")
 	public void running_workflow_report_recon() throws InterruptedException, IOException {
 		menu.clickSubMenu("Workflow Manager", "Workflows", scenario);
 		menu.doubleClickData("JALIN_LINK_EOD", scenario);
