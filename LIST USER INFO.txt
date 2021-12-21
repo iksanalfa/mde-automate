@@ -1,0 +1,25 @@
+
+https://10.20.16.30:8444/renaissance-portal/#/
+USER LOGIN REN EN(EURONET)
+USER     : Sigmauser-4 
+PASSWORD : S1gm41234*
+
+
+https://10.132.130.254:8444/renaissance-portal/
+USER LOGIN REN VPN JALIN :
+USER     : Sigmauser-12 
+PASSWORD : S!gm4user12@12#$
+
+
+VPN APP: FortiClient
+User VPN Jalin
+User: ahmad.munif
+Pass: P@ssw0rd
+
+
+SFTP
+IP: 10.132.130.254::22
+user : renapp pass: renapp@123
+
+sftp port 22 IP : 10.132.133.252 
+USER: EN-USER1 PASSWORD: EN-USER1
